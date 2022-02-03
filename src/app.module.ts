@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { ServicesModule } from './services/services.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {User} from "./users/entities/user.entity";
+import {Service} from "./services/entities/service.entity";
 
 @Module({
   imports: [UsersModule, ServicesModule, TypeOrmModule.forRoot({
@@ -13,8 +14,8 @@ import {User} from "./users/entities/user.entity";
     port: 5432,
     username: 'chs',
     password: 'qwerty',
-    database: 'server',
-    entities: [User],
+    database: 'chs',
+    entities: [User, Service],
     synchronize: true,
   })],
   controllers: [AppController],

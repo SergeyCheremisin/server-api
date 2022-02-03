@@ -13,6 +13,6 @@ export class User {
     name: string;
 
     @ManyToMany(() => Service, service => service.users)
-    @JoinTable()
+    @JoinTable({name: 'Subscriptions'})
     services: Service[];
 }
