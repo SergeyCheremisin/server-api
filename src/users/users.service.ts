@@ -34,6 +34,17 @@ export class UsersService {
     await connection.manager.save([user]);
   }
 
+  async getServiceForUserById(id) {
+    const connection = getConnection();
+    const subscribers = await connection
+        .getRepository(User)
+        .createQueryBuilder("user")
+        .leftJoinAndSelect("user.services", "service")
+        .getMany();
+    const user = subscribers.find(subscriber => subscriber.id == id);
+    return user.services;
+  }
+
   async removeUserById(id: number): Promise<void> {
     await this.usersRepository.delete(id);
   }

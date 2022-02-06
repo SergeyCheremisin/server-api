@@ -22,6 +22,11 @@ export class UsersController {
     return this.usersService.getUserById(+id);
   }
 
+  @Get(':id/services')
+  getServiceForUserById(@Param('id') id: string) {
+    return this.usersService.getServiceForUserById(+id);
+  }
+
   @Patch(':id')
   addServiceForUser(@Param('id') user_id: string, @Body('service_id') service_id: string) {
     return this.usersService.addServiceForUser(+user_id, +service_id);
