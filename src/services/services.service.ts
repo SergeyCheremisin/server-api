@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
+import {getConnection, Repository} from "typeorm";
 import {Service} from "./entities/service.entity";
 
 @Injectable()
@@ -18,6 +18,19 @@ export class ServicesService {
 
   findAll(): Promise<Service[]> {
     return this.servicesRepository.find();
+  }
+
+  async findPopular() {
+    const connection = getConnection();
+    const services = await connection
+        .getRepository(Service)
+        .createQueryBuilder("service")
+        .leftJoinAndSelect("service.users", "user")
+        .getMany();
+    function byField(field) {
+      return (a, b) => a[field] > b[field] ? -1 : 1;
+    }
+    return services.sort( byField('users') );
   }
 
   findOne(id: number): Promise<Service> {
