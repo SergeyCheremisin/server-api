@@ -23,8 +23,8 @@ export class UsersController {
   }
 
   @Patch(':id')
-  addServiceForUser() {
-    return this.usersService.addServiceForUser();
+  addServiceForUser(@Param('id') user_id: string, @Body('service_id') service_id: string) {
+    return this.usersService.addServiceForUser(+user_id, +service_id);
   }
 
   @Delete(':id')
