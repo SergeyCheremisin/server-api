@@ -1,48 +1,66 @@
-import { Injectable } from '@nestjs/common';
-import { CreateServiceDto } from './dto/create-service.dto';
-import { UpdateServiceDto } from './dto/update-service.dto';
+import {Injectable} from '@nestjs/common';
+import {CreateServiceDto} from './dto/create-service.dto';
+import {UpdateServiceDto} from './dto/update-service.dto';
 import {InjectRepository} from "@nestjs/typeorm";
-import {getConnection, Repository} from "typeorm";
+import {getRepository, Repository} from "typeorm";
 import {Service} from "./entities/service.entity";
 
 @Injectable()
 export class ServicesService {
-  constructor(
-      @InjectRepository(Service)
-      private servicesRepository: Repository<Service>,
-  ) {}
-
-  create(createServiceDto: CreateServiceDto) {
-    return this.servicesRepository.insert(createServiceDto);
-  }
-
-  findAll(): Promise<Service[]> {
-    return this.servicesRepository.find();
-  }
-
-  async findPopular() {
-    const connection = getConnection();
-    const services = await connection
-        .getRepository(Service)
-        .createQueryBuilder("service")
-        .leftJoinAndSelect("service.users", "user")
-        .getMany();
-    function byField(field) {
-      return (a, b) => a[field] > b[field] ? -1 : 1;
+    constructor(
+        @InjectRepository(Service)
+        private servicesRepository: Repository<Service>,
+    ) {
     }
-    return services.sort( byField('users') );
-  }
 
-  findOne(id: number): Promise<Service> {
-    return this.servicesRepository.findOne(id);
-  }
+    async createNewService(createServiceDto: CreateServiceDto) {
+        return getRepository(Service)
+            .createQueryBuilder("service")
+            .insert()
+            .into(Service)
+            .values(createServiceDto)
+            .execute();
+    }
 
-  async update(id: number, updateServiceDto: UpdateServiceDto) {
-    const service = await this.servicesRepository.findOne(id);
-    await this.servicesRepository.update(updateServiceDto, service);
-  }
+    async findAllServices(): Promise<Service[]> {
+        return getRepository(Service)
+            .createQueryBuilder("service")
+            .getMany();
+    }
 
-  async remove(id: number): Promise<void> {
-    await this.servicesRepository.delete(id);
-  }
+    async findPopularServices(): Promise<Service[]> {
+        const services = await getRepository(Service)
+            .createQueryBuilder("service")
+            .leftJoinAndSelect("service.users", "user")
+            .getMany();
+        function byField(field) {
+            return (a, b) => a[field] > b[field] ? -1 : 1;
+        }
+        return services.sort(byField('users'));
+    }
+
+    async findServiceById(id: number): Promise<Service> {
+        return getRepository(Service)
+            .createQueryBuilder("service")
+            .where("service.id = :id", {id})
+            .getOne();
+    }
+
+    async updateServiceById(id: number, updateServiceDto: UpdateServiceDto) {
+        await getRepository(Service)
+            .createQueryBuilder("service")
+            .update(Service)
+            .set(updateServiceDto)
+            .where("id = :id", {id})
+            .execute();
+    }
+
+    async removeServiceById(id: number): Promise<void> {
+        await getRepository(Service)
+            .createQueryBuilder("service")
+            .delete()
+            .from(Service)
+            .where("id = :id", {id})
+            .execute();
+    }
 }
